@@ -8,3 +8,6 @@
 ## 4. make -j -s 
 ## 5. ./boeRpcImageAsyncServer 
 ## 6. ./boeRpcAsyncClient
+## 7. log
+    Boeedge:/data/image_server/build> ./boeRpcImageAsyncServer 
+     Server listening on 0.0.0.0:50051
