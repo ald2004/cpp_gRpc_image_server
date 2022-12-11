@@ -1,0 +1,1 @@
+# cpp_gRpc_image_server
