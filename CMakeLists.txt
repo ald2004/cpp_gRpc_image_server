@@ -20,8 +20,16 @@
 cmake_minimum_required(VERSION 3.5.1)
 
 project(BoeImageServer C CXX)
-find_package(OpenCV REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+
+if(CMAKE_INSTALL_PREFIX)
+else()
+  set(CMAKE_INSTALL_PREFIX ./install)
+endif()
+
+
+find_package(OpenCV REQUIRED)
 # If the package has been found, several variables will
 # be set, you can find the full list with descriptions
 # in the OpenCVConfig.cmake file.
@@ -40,9 +48,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 set(CMAKE_BUILD_TYPE Debug)
 include(cmake/common.cmake)
 # set install path
-set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+# set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 # Proto file
-get_filename_component(hw_proto "protos/image.proto" ABSOLUTE)
+get_filename_component(hw_proto "image.proto" ABSOLUTE)
 get_filename_component(hw_proto_path "${hw_proto}" PATH)
 
 # Generated sources
@@ -87,5 +95,9 @@ foreach(_target
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF}
     ${OpenCV_LIBS})
-    
+  target_compile_features(${_target} PRIVATE cxx_std_17)
 endforeach()
+
+add_executable(sometest xx.cc)
+target_compile_features(sometest PRIVATE cxx_std_17)
+install(TARGETS sometest DESTINATION ${CMAKE_INSTALL_PREFIX})
