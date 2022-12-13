@@ -3,23 +3,46 @@
 #include <string>
 #include <thread>
 #include <fstream>
-
 #include <grpc/support/log.h>
 #include <grpcpp/grpcpp.h>
 
+
 #include "image.grpc.pb.h"
 
-
+int count_=0;
 using grpc::Server;
 using grpc::ServerAsyncResponseWriter;
 using grpc::ServerBuilder;
 using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
 using grpc::Status;
-
 using boe::upLoadImage;
 using boe::UploadReply;
 using boe::ABImage;
+
+inline
+std::string get_uuid_32() {
+    std::string uuid_dev = "/proc/sys/kernel/random/uuid";
+
+    std::ifstream file(uuid_dev);
+    //std::cout << uuid_dev << std::endl;
+    if (file.is_open()) {
+        std::string line;
+        std::getline(file, line);
+        //std::cout << line << std::endl;
+        line.erase(std::remove(line.begin(), line.end(), '-'), line.end());
+        //std::cout << line << std::endl;
+        file.close();
+        return line;
+    }
+    else {
+        //std::cout << "not opened" << std::endl;
+        file.close();
+        return "";
+    }
+
+}
+
 
 class ServerImpl final {
  public:
@@ -31,7 +54,7 @@ class ServerImpl final {
 
   // There is no shutdown handling in this code.
   void Run() {
-    std::string server_address("0.0.0.0:50051");
+    std::string server_address("0.0.0.0:50052");
 
     ServerBuilder builder;
     // Listen on the given address without any authentication mechanism.
@@ -64,7 +87,10 @@ class ServerImpl final {
     }
 
     void Proceed() {
+      count_++;
       if (status_ == CREATE) {
+        // std::cout<< "xxxxxxxxxxxxxxxxxxxxxx ";
+        // std::cout<< count_ << " xxxxxxxxxxxxx" <<std::endl;
         // Make this instance progress to the PROCESS state.
         status_ = PROCESS;
 
@@ -73,40 +99,46 @@ class ServerImpl final {
         // the tag uniquely identifying the request (so that different CallData
         // instances can serve different requests concurrently), in this case
         // the memory address of this CallData instance.
-        // service_->RequestSayHello(&ctx_, &request_, &responder_, cq_, cq_,this);
-        service_->RequestdoUpload(&ctx_,&request_,&responder_,cq_,cq_,this);
-
+        // service_->RequestSayHello(&ctx_, &request_, &responder_, cq_, cq_,
+        //                           this);
+        service_->RequestdoUpload(&ctx_, &request_, &responder_, cq_, cq_,
+                                  this);
       } else if (status_ == PROCESS) {
+        // std::cout<< "yyyyyyyyyyyyyyyyyyyy ";
+        // std::cout<< count_ << " yyyyyyyyyyyyyyyy" <<std::endl;
         // Spawn a new CallData instance to serve new clients while we process
         // the one for this CallData. The instance will deallocate itself as
         // part of its FINISH state.
         new CallData(service_, cq_);
 
         // The actual processing.
-        std::string prefix("Hello :");
-
-        /**
-         * @brief to-do
-         * 
-         */
-        auto data=request_.data();
-        // std::string data("3333333333333333333333333");
-        // std::cout<<"3333333333333333333333333"<<std::endl<<data<<std::endl;
-        std::ofstream outfile("/dev/shm/boeAsync.jpg",std::ofstream::binary);
+        std::string prefix("Hello ");
+        // reply_.set_message(prefix + request_.name());
+        // reply_.set_message(prefix + request_.data());
+        std::string tmpimagefilename("/dev/shm/"+get_uuid_32()+".jpg");
+        std::ofstream outfile(tmpimagefilename,std::ofstream::binary|std::ofstream::out);
+        // std::string rowData = request_.data();
+        // std::cout << "server got data: "<<rowData.substr(0,20) << " and " <<rowData.length() <<std::endl;
+        // grpc::string mat = request_.data();
+        // std::cout << mat.c_str() <<std::endl;
         if(outfile.good()){
-            outfile.write(data.c_str(),data.length());
-            reply_.set_message(prefix + "file boeAsync.jpg generated!");
+            outfile.write(request_.data().c_str(),request_.data().length());
+            reply_.set_message(prefix + "file generated!["+std::to_string(request_.data().length())+"]");
             outfile.close();
+            
         }
         else{
-            reply_.set_message(prefix + "error!");
+            reply_.set_message(prefix + "error!["+std::to_string(count_)+"]");
         }
+        // And
         // And we are done! Let the gRPC runtime know we've finished, using the
         // memory address of this instance as the uniquely identifying tag for
         // the event.
         status_ = FINISH;
         responder_.Finish(reply_, Status::OK, this);
       } else {
+        // std::cout<< "zzzzzzzzzzzzzzzz ";
+        // std::cout<< count_ << " zzzzzzzzzzzzz" <<std::endl;
         GPR_ASSERT(status_ == FINISH);
         // Once in the FINISH state, deallocate ourselves (CallData).
         delete this;
