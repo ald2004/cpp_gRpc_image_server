@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
 //   std::string reply = client.upLoadImage(img);  // The actual RPC call!
 //   std::cout << "client received: " << reply << std::endl;
 
-  std::ifstream fs("../xxx.jpg",std::ifstream::binary);
+  std::ifstream fs("../xx.jpg",std::ifstream::binary);
   if(fs.good()){
     std::ostringstream os;
     os << fs.rdbuf();
