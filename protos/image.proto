@@ -15,6 +15,5 @@ message UploadReply{
 }
 
 service upLoadImage{
-    rpc doUpload(ABImage) returns (UploadReply);
-    rpc doUploadX(UploadReply) returns (UploadReply);
+    rpc doUpload(ABImage) returns (UploadReply){}
 }
