@@ -13,5 +13,5 @@
      Server listening on 0.0.0.0:50051
 
 
-## 8. pref
+## 8. pref 3M per picture, can be upload in 175ms for async request, and can be write done in 1s.
 ![image](https://user-images.githubusercontent.com/4443533/207253380-002d1b28-c34c-4af5-9965-2ce37aaca16e.png)
