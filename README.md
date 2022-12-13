@@ -11,3 +11,7 @@
 ## 7. log
     Boeedge:/data/image_server/build> ./boeRpcImageAsyncServer 
      Server listening on 0.0.0.0:50051
+
+
+## 8. pref
+![image](https://user-images.githubusercontent.com/4443533/207253380-002d1b28-c34c-4af5-9965-2ce37aaca16e.png)
